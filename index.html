@@ -1,0 +1,179 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>MPI Mengenal AI dan Machine Learning</title>
+<style>
+:root{--bg:#f4f6fb;--c:#fff;--t:#1b2233;--m:#59647a;--p:#4f46e5;--ok:#15803d;--no:#b91c1c;--b:#dbe1ec;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1320;--c:#18213a;--t:#e8ecf6;--m:#9aa6c0;--p:#8b93ff;--ok:#4ade80;--no:#f87171;--b:#2a3556}}
+:root[data-theme="dark"]{--bg:#0e1320;--c:#18213a;--t:#e8ecf6;--m:#9aa6c0;--p:#8b93ff;--ok:#4ade80;--no:#f87171;--b:#2a3556}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--t);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+#app{max-width:820px;margin:0 auto;padding:14px}
+.card{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:16px;margin:12px 0}
+h1,h2,h3{line-height:1.25;margin:.2em 0 .5em}.m{color:var(--m);font-size:.9rem}
+.btn{background:var(--p);color:#fff;border:0;border-radius:10px;padding:10px 16px;font:inherit;cursor:pointer}
+.btn.g{background:transparent;color:var(--p);border:1px solid var(--p)}.btn:disabled{opacity:.4;cursor:not-allowed}
+.opt{display:block;width:100%;text-align:left;background:var(--c);color:var(--t);border:1px solid var(--b);border-radius:10px;padding:9px 12px;margin:5px 0;font:inherit;cursor:pointer}
+.opt.sel{border-color:var(--p);box-shadow:0 0 0 2px var(--p) inset}.opt.ok{border-color:var(--ok)}.opt.no{border-color:var(--no)}
+.fb{margin-top:6px;font-size:.92rem}.fb.ok{color:var(--ok)}.fb.no{color:var(--no)}
+input,select,textarea{width:100%;padding:10px;border:1px solid var(--b);border-radius:10px;background:var(--c);color:var(--t);font:inherit;margin:4px 0 10px}
+.bar{height:9px;background:var(--b);border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:var(--p)}
+.row{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%}th,td{border:1px solid var(--b);padding:7px 9px;text-align:left;font-size:.9rem}
+.nest{display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:16px;background:color-mix(in srgb,var(--p) 12%,transparent);border:2px solid var(--p)}
+.nest .nest{background:color-mix(in srgb,var(--p) 18%,transparent)}.pill{display:inline-block;background:var(--b);border-radius:20px;padding:2px 10px;font-size:.8rem}
+.flow div{border:2px solid var(--p);padding:8px 12px;margin:4px 0;border-radius:8px;background:var(--c)}
+</style></head><body><div id="app"></div>
+<script>
+const $=s=>document.querySelector(s),app=$('#app'),LS='mpi8_kelas8',N=14;
+let S=null,db=null,user=null,mode='s',D=[];
+try{S=JSON.parse(localStorage.getItem(LS)||'null')}catch(e){}
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const now=()=>new Date().toISOString();
+const fmt=t=>t?new Date(t).toLocaleString('id-ID',{dateStyle:'short',timeStyle:'short'}):'-';
+function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}
+ if(db&&S){try{db.collection('students').doc(S.id).set(S).catch(()=>{})}catch(e){}}}
+function log(t){S.la=t;S.lastAt=now();save()}
+function go(n){S.step=n;S.max=Math.max(S.max,n);save();render();scrollTo(0,0)}
+
+/* ===== BANK SOAL ===== */
+const F=[ // latihan formatif (5)
+["Mesin yang dibuat untuk meniru kecerdasan manusia dalam mengerjakan tugas disebut…",["Kecerdasan Artifisial (AI)","Printer","Kabel data","Layar sentuh"],0,"AI adalah bidang yang membuat mesin mampu bertindak cerdas."],
+["Data latih Supervised Learning berisi…",["Contoh data tanpa jawaban","Contoh data beserta label (jawaban benar)","Hanya suara","Hanya angka acak"],1,"Label adalah 'kunci jawaban' yang dipelajari model."],
+["Filter email belajar dari ribuan email yang sudah ditandai 'spam' atau 'bukan spam'. Ini contoh…",["Supervised Learning","Kalkulator","Flowchart saja","Bukan AI"],0,"Ada data dan label, jadi ini Supervised Learning."],
+["Aturan 'Jika hujan maka bawa payung' disebut…",["Percabangan (if-then)","Perulangan","Animasi","Basis data"],0,"Syarat menentukan tindakan yang dipilih."],
+["Bentuk belah ketupat pada flowchart dipakai untuk…",["Keputusan","Mulai","Selesai","Warna"],0,"Belah ketupat = pertanyaan dengan jalur Ya/Tidak."]];
+const E=[ // evaluasi (20)
+["Urutan cakupan dari yang paling luas ke paling sempit adalah…",["AI → Machine Learning → Deep Learning","Deep Learning → Machine Learning → AI","Machine Learning → AI → Deep Learning","AI → Deep Learning → Machine Learning"],0,"DL bagian dari ML, ML bagian dari AI."],
+["Ciri utama Deep Learning adalah…",["Tidak memakai data","Memakai jaringan saraf tiruan berlapis banyak","Hanya memakai aturan if-then","Hanya untuk kalkulator"],1,"Kata 'deep' merujuk pada banyaknya lapisan jaringan saraf."],
+["Pernyataan yang benar adalah…",["Semua AI pasti ML","Semua ML adalah AI, tetapi tidak semua AI adalah ML","ML lebih luas dari AI","DL bukan bagian AI"],1,"AI juga mencakup sistem berbasis aturan yang tidak belajar dari data."],
+["Karakter game bergerak dengan aturan if-then buatan programmer, tanpa belajar dari data. Ini termasuk…",["AI, tetapi bukan ML","Deep Learning","Supervised Learning","Bukan AI"],0,"Aturan ditulis manusia, tidak dipelajari dari data."],
+["Pembuka kunci wajah HP belajar dari jutaan foto dengan jaringan saraf berlapis banyak. Tekniknya paling tepat disebut…",["Aturan tetap","Deep Learning","Flowchart","Spreadsheet"],1,"Jaringan saraf berlapis banyak = Deep Learning."],
+["Dalam Supervised Learning, 'label' berarti…",["Warna aplikasi","Jawaban benar untuk setiap contoh data","Nama programmer","Kecepatan komputer"],1,"Label adalah jawaban benar yang menyertai data."],
+["1.000 foto kucing dan anjing sudah diberi nama hewannya, lalu model dilatih menebak hewan di foto baru. Ini…",["Supervised Learning","Aturan if-then manual","Bukan machine learning","Hanya penyimpanan data"],0,"Data berlabel + prediksi data baru = Supervised Learning."],
+["Urutan tahap Supervised Learning yang tepat adalah…",["Pakai model → latih → kumpulkan data","Kumpulkan data berlabel → latih → uji → pakai","Uji → kumpulkan data → pakai → latih","Latih → pakai → uji → kumpulkan data"],1,"Data dulu, lalu latih, uji, baru dipakai."],
+["Memprediksi harga rumah dari luas dan lokasi termasuk Supervised Learning karena…",["Data latihnya punya jawaban (harga sebenarnya)","Tidak memakai data","Komputer menebak acak","Harus ada gambar"],0,"Harga lama berfungsi sebagai label."],
+["Model akurat pada data latih tetapi sering salah pada foto baru. Penyebab paling mungkin…",["Data latih kurang beragam","Layar HP kecil","Baterai lemah","Nama file panjang"],0,"Model hanya hafal pola yang sempit, sehingga gagal pada data baru."],
+["Aplikasi video merekomendasikan tontonan yang cocok karena…",["Menebak acak","Belajar dari pola kebiasaan menonton","Membaca pikiran","Menyalin tontonan teman"],1,"Rekomendasi adalah penerapan ML dari data kebiasaan."],
+["Penerapan AI di bidang kesehatan yang tepat adalah…",["Membantu membaca foto rontgen untuk dicek dokter","Menggantikan semua dokter tanpa pengawasan","Menggantikan obat","Menyembuhkan otomatis"],0,"AI membantu, keputusan akhir tetap pada manusia."],
+["AI dilatih dari data yang hanya mewakili sebagian kelompok orang. Risikonya…",["Hasil bisa tidak adil bagi kelompok lain","Selalu benar","Menjadi lebih cepat","Tidak ada risiko"],0,"Data yang bias menghasilkan keputusan yang bias."],
+["Aturan: 'Jika nilai ≥ 75 maka Tuntas, jika tidak maka Remedial'. Nilai Dika 70. Hasilnya…",["Tuntas","Remedial","Mengulang semua","Tidak bisa ditentukan"],1,"70 tidak memenuhi syarat ≥ 75, jadi jalur 'tidak'."],
+["Aturan: 'Jika hujan DAN tidak membawa payung maka basah'. Hujan dan Sari membawa payung. Hasilnya…",["Basah","Tidak basah","Hujan berhenti","Tidak dapat ditentukan"],1,"DAN menuntut kedua syarat benar; syarat kedua salah."],
+["Bentuk belah ketupat pada flowchart dipakai untuk…",["Mulai/Selesai","Proses","Keputusan","Garis"],2,"Simbol keputusan mengajukan pertanyaan Ya/Tidak."],
+["Simbol keputusan flowchart sebaiknya punya…",["Satu panah keluar","Dua jalur keluar berlabel (Ya/Tidak)","Tidak ada panah","Lima jalur tanpa label"],1,"Keputusan bercabang sesuai jawabannya."],
+["Aturan spam: 'Jika kata mencurigakan ≥ 3 maka Spam'. Email berisi 2 kata mencurigakan akan…",["Dinyatakan spam","Dinyatakan bukan spam","Dihapus","Ditolak"],1,"2 < 3, syarat tidak terpenuhi."],
+["Ambang spam diturunkan menjadi '≥ 1 kata'. Dampak paling mungkin…",["Lebih banyak email penting ikut terblokir","Tidak ada perubahan","Semua spam lolos","Komputer mati"],0,"Ambang terlalu rendah membuat email biasa dianggap spam."],
+["Mengapa aturan diuji lewat simulasi sebelum dipakai sungguhan?",["Menemukan kesalahan aturan lebih dulu","Agar tidak perlu data","Supaya terlihat keren","Agar tidak perlu flowchart"],0,"Simulasi menguji aturan tanpa risiko nyata."]];
+const SORT1=[["Rekomendasi video di aplikasi",0,"Ya. Aplikasi belajar dari kebiasaan menontonmu."],["Lampu dengan saklar biasa",1,"Tidak. Hanya menyambung arus, tanpa 'kecerdasan'."],["Asisten suara di HP",0,"Ya. Ia memahami ucapanmu."],["Buku catatan kertas",1,"Tidak. Tidak mengolah informasi."],["Peta digital memprediksi macet",0,"Ya. Ia mengolah data lalu lintas untuk memprediksi."]];
+const SORT2=[["Karakter game bergerak dengan aturan if-then buatan programmer",0,"AI saja: aturan ditulis manusia, bukan dipelajari."],["Filter spam belajar dari ribuan email berlabel",1,"Machine Learning: belajar dari data berlabel."],["Pengenal wajah memakai jaringan saraf berlapis banyak",2,"Deep Learning: jaringan saraf berlapis."],["Prediksi harga rumah dari data penjualan lama",1,"Machine Learning: belajar dari data lama."],["Robot pembersih berbelok jika menabrak (aturan tetap)",0,"AI saja: aturan tetap."],["Pengenal objek di foto dengan jaringan saraf dalam",2,"Deep Learning."]];
+const EM=[["Rapat OSIS besok",0,0],["Tugas koding dikumpul Jumat",1,0],["Info beasiswa resmi sekolah",2,0],["MENANG HADIAH!!! klik link",4,1],["Pinjaman cepat tanpa syarat",5,1],["Transfer sekarang, gratis!",6,1]];
+const FL=["⬭ Mulai","▭ Cek prakiraan cuaca","◇ Apakah akan hujan?","▭ (Ya) Bawa payung","▭ (Tidak) Berangkat tanpa payung","⬭ Selesai"];
+
+/* ===== HALAMAN ===== */
+function sorter(key,items,ch,title){
+ const A=S.acts[key]=S.acts[key]||{score:0,attempts:0,res:{}};
+ const ok=items.every((_,i)=>A.res[i]?.done);
+ return `<h3>${title}</h3><div class="m">Jawaban tidak dapat diubah setelah dipilih, jadi pikirkan dulu ya.</div>`+items.map((it,i)=>{const r=A.res[i]||{};
+  return `<div class="card"><b>${i+1}. ${esc(it[0])}</b>${ch.map((c,j)=>`<button class="opt ${r.done&&j==it[1]?'ok':r.done&&r.last==j?'no':''}" ${r.done?'disabled':''} onclick="pick('${key}',${i},${j})">${esc(c)}</button>`).join('')}
+  ${r.done?(r.ok?`<div class="fb ok">Benar. ${esc(it[2])}</div>`:`<div class="fb no">Belum tepat. Jawaban yang benar: ${esc(ch[it[1]])}. ${esc(it[2])}</div>`):''}</div>`}).join('')+(ok?`<div class="fb ok"><b>Bagian ini selesai! Skor: ${A.score}/${items.length} benar.</b></div>`:'');}
+function pick(key,i,j){const it=(key=='ap'?SORT1:SORT2)[i],A=S.acts[key],r=A.res[i]=A.res[i]||{};if(r.done)return;A.attempts++;r.last=j;r.done=true;r.ok=j==it[1];if(r.ok)A.score++;
+ log(key=='ap'?'Apersepsi':'Aktivitas: Klasifikasi AI/ML/DL');render()}
+function simPage(){
+ const A=S.acts.sim=S.acts.sim||{score:0,attempts:0,th:7};const th=A.th;
+ const ok=EM.filter(e=>(e[1]>=th?1:0)==e[2]).length;
+ return `<div class="card"><b>Konsep:</b> model belajar dari data berlabel lalu menguji aturannya.<br><b>Tugasmu:</b> geser ambang agar semua email (data berlabel) ditebak benar.</div>
+ <div class="card"><label>Aturan: jika kata mencurigakan ≥ <b>${th}</b> → SPAM</label><input type="range" min="1" max="7" value="${th}" oninput="simSet(this.value)">
+ <div class="tw"><table><tr><th>Email</th><th>Kata mencurigakan</th><th>Label asli</th><th>Tebakan</th><th></th></tr>${EM.map(e=>{const g=e[1]>=th?1:0;return `<tr><td>${esc(e[0])}</td><td>${e[1]}</td><td>${e[2]?'Spam':'Bukan'}</td><td>${g?'Spam':'Bukan'}</td><td>${g==e[2]?'✅':'❌'}</td></tr>`}).join('')}</table></div>
+ <p><b>Benar: ${ok}/6</b></p>${ok==6?`<div class="fb ok">Benar. Ambang ${th} memisahkan email biasa (0–2 kata) dari spam (4–6 kata). Inilah inti Supervised Learning: menyesuaikan aturan memakai data berlabel.</div>`:`<div class="fb no">Coba lagi. Perhatikan baris bertanda ❌, lalu geser ambang ke atas atau ke bawah.</div>`}</div>`}
+function simSet(v){const A=S.acts.sim;A.th=+v;A.attempts++;const ok=EM.filter(e=>(e[1]>=A.th?1:0)==e[2]).length;A.score=ok;A.done=ok==6;log('Simulasi filter spam');render()}
+function flowPage(){
+ const A=S.acts.flow=S.acts.flow||{score:0,attempts:0,ord:[2,5,0,4,1,3]};
+ return `<div class="card"><b>Konsep:</b> flowchart menggambarkan langkah dan keputusan.<br><b>Tugasmu:</b> urutkan blok agar menjadi flowchart keputusan "Perlu membawa payung?".</div>
+ <div class="card flow">${A.ord.map((b,i)=>`<div class="row"><span>${esc(FL[b])}</span><span><button class="btn g" onclick="mv(${i},-1)" ${i==0?'disabled':''}>↑</button> <button class="btn g" onclick="mv(${i},1)" ${i==5?'disabled':''}>↓</button></span></div>`).join('')}
+ <button class="btn" onclick="chkFlow()">Periksa urutan</button><div id="ff" class="fb">${A.msg||''}</div></div>
+ ${A.done?`<div class="card"><b>Simulasikan flowchart-mu:</b> Apakah hari ini hujan?<br><button class="btn g" onclick="pathF(1)">Ya</button> <button class="btn g" onclick="pathF(0)">Tidak</button><div class="fb ok">${A.path||''}</div></div>`:''}`}
+function mv(i,d){const o=S.acts.flow.ord;[o[i],o[i+d]]=[o[i+d],o[i]];S.acts.flow.msg='';save();render()}
+function chkFlow(){const A=S.acts.flow;A.attempts++;const c=A.ord.filter((b,i)=>b==i).length;A.score=c;
+ if(c==6){A.done=true;A.msg='<span class="ok">Benar. Mulai → cek cuaca → keputusan → dua jalur (Ya/Tidak) → selesai.</span>';log('Aplikasi: flowchart keputusan')}else A.msg='<span class="no">Coba lagi. Baru '+c+' blok yang tepat. Ingat: keputusan harus datang setelah data cuaca dicek.</span>';save();render()}
+function pathF(y){S.acts.flow.path=y?'Jalur Ya: Cek cuaca → Hujan? Ya → Bawa payung → Selesai.':'Jalur Tidak: Cek cuaca → Hujan? Tidak → Berangkat tanpa payung → Selesai.';save();render()}
+function quizF(){
+ const A=S.acts.form=S.acts.form||{score:0,attempts:0,res:{}};
+ const ok=F.every((_,i)=>A.res[i]?.done);
+ return `<div class="m">Jawaban tidak dapat diubah setelah dipilih.</div>`+F.map((q,i)=>{const r=A.res[i]||{};return `<div class="card"><b>${i+1}. ${esc(q[0])}</b>${q[1].map((o,j)=>`<button class="opt ${r.done&&j==q[2]?'ok':r.done&&r.last==j?'no':''}" ${r.done?'disabled':''} onclick="pf(${i},${j})">${esc(o)}</button>`).join('')}
+ ${r.done?(r.ok?`<div class="fb ok">Benar. ${esc(q[3])}</div>`:`<div class="fb no">Belum tepat. Jawaban yang benar: ${esc(q[1][q[2]])}. ${esc(q[3])}</div>`):''}</div>`}).join('')+(ok?`<div class="fb ok"><b>Latihan selesai. Benar: ${A.score}/5.</b></div>`:'')}
+function pf(i,j){const A=S.acts.form,r=A.res[i]=A.res[i]||{};if(r.done)return;A.attempts++;r.last=j;r.done=true;r.ok=j==F[i][2];if(r.ok)A.score++;log('Latihan formatif');render()}
+function evalPage(){
+ if(S.ev){const e=S.ev;return `<div class="card"><h2>Hasil Evaluasi</h2><p>Skor: <b>${e.score}</b> dari ${e.total}<br>Benar: ${e.score} · Salah: ${e.total-e.score}<br>Persentase: <b>${e.pct}%</b><br>Status: <b>Selesai</b> (${e.pct>=75?'Tuntas':'Perlu pengayaan'})</p></div>`+
+ e.wrong.map(i=>`<div class="card"><b>${esc(E[i][0])}</b><div class="fb ok">Jawaban tepat: ${esc(E[i][1][E[i][2]])}. ${esc(E[i][3])}</div></div>`).join('')}
+ S.eo=S.eo||E.map((_,i)=>i).sort(()=>Math.random()-.5);S.ea=S.ea||{};
+ const n=Object.keys(S.ea).length;
+ return `<div class="card m">Pilih satu jawaban untuk setiap soal. Terjawab: ${n}/${E.length}. Santai saja, ini untuk melihat sejauh mana kamu paham. Jawaban tidak bisa diubah setelah dipilih.</div>`+S.eo.map((qi,k)=>{const q=E[qi];return `<div class="card"><b>${k+1}. ${esc(q[0])}</b>${q[1].map((o,j)=>`<button class="opt ${S.ea[qi]===j?'sel':''}" ${S.ea[qi]!==undefined?'disabled':''} onclick="ea(${qi},${j})">${esc(o)}</button>`).join('')}</div>`}).join('')+`<button class="btn" ${n<E.length?'disabled':''} onclick="subEval()">Kirim jawaban</button>`}
+function ea(q,j){if(S.ea[q]!==undefined)return;S.ea[q]=j;save();render()}
+function subEval(){const wrong=E.map((_,i)=>i).filter(i=>S.ea[i]!==E[i][2]),sc=E.length-wrong.length;
+ S.ev={score:sc,total:E.length,pct:Math.round(sc/E.length*100),wrong,at:now()};log('Evaluasi akhir dikirim');render()}
+const T=(s,c)=>`<div class="card">${s}</div>`;
+const P=[
+{t:'Login',f:()=>''},
+{t:'Selamat Datang',g:'i',f:()=>`<div class="card"><h2>Welcome, ${esc(S.nama)} 👋</h2><p>Kamu akan belajar bagaimana komputer bisa "belajar", lalu mencobanya sendiri lewat simulasi.</p><p class="m">Progres tersimpan otomatis. Jika keluar, kamu bisa lanjut dari bagian terakhir.</p></div>`},
+{t:'Tujuan Belajar',g:'i',f:()=>`<div class="card"><h3>Setelah ini kamu mampu…</h3><ul><li>Menjelaskan Supervised Learning</li><li>Membedakan AI, ML, dan DL</li><li>Menjelaskan penerapan AI sehari-hari</li><li>Menghubungkan logika dengan kehidupan nyata</li><li>Membuat flowchart keputusan</li><li>Membuat simulasi sederhana</li></ul></div>`},
+{t:'Apersepsi',g:'m',f:()=>`<div class="card"><b>Pertanyaan pemantik:</b> HP-mu bisa menebak kata berikutnya yang akan kamu ketik. Bagaimana caranya?</div>`+sorter('ap',SORT1,['Ya, ada AI','Tidak ada AI'],'Pemanasan: mana yang memakai AI?'),gate:()=>S.acts.ap&&SORT1.every((_,i)=>S.acts.ap.res[i]?.done)},
+{t:'AI, ML, dan DL',g:'m',f:()=>`<div class="card"><b>Konsep:</b> AI = mesin yang bertindak cerdas. ML = AI yang belajar dari data. DL = ML dengan jaringan saraf berlapis banyak.</div>
+ <div class="nest"><b>AI</b> Kecerdasan Artifisial<div class="nest"><b>ML</b> Machine Learning<div class="nest"><b>DL</b> Deep Learning</div></div></div>
+ <div class="card tw"><table><tr><th></th><th>Cara kerja</th><th>Contoh</th></tr><tr><td>AI</td><td>Aturan manusia atau belajar</td><td>NPC game</td></tr><tr><td>ML</td><td>Belajar dari data</td><td>Filter spam</td></tr><tr><td>DL</td><td>Jaringan saraf berlapis</td><td>Kunci wajah</td></tr></table></div>
+ <div class="card"><b>Contoh:</b> robot yang berbelok saat menabrak dinding.<br><b>Penjelasan:</b> itu AI karena tampak cerdas, tetapi bukan ML karena aturannya ditulis manusia.</div>
+ <div class="card m"><b>Miskonsepsi:</b> "AI pasti selalu benar." Salah. AI bisa keliru, terutama jika datanya kurang baik.</div>`},
+{t:'Supervised Learning',g:'m',f:()=>`<div class="card"><b>Konsep:</b> Supervised Learning = belajar dari contoh yang sudah diberi <b>label</b> (jawaban benar), seperti belajar dengan kunci jawaban.</div>
+ <div class="card"><b>Contoh:</b> foto 🐱 berlabel "kucing" dan foto 🐶 berlabel "anjing".<br><b>Penjelasan:</b> setelah melihat banyak contoh, model bisa menebak hewan di foto baru.</div>
+ <div class="card flow"><div>1. Kumpulkan data berlabel</div><div>2. Latih model</div><div>3. Uji dengan data baru</div><div>4. Pakai di kehidupan nyata</div></div>
+ <div class="card"><b>Penerapan sehari-hari:</b> filter spam, rekomendasi video, deteksi macet di peta, bantuan membaca rontgen. <span class="m">Hati-hati: data yang tidak beragam membuat hasil bisa tidak adil.</span></div>`},
+{t:'Logika dan Flowchart',g:'m',f:()=>`<div class="card"><b>Konsep:</b> logika "jika–maka" dipakai komputer untuk memilih tindakan. Flowchart menggambarkannya.</div>
+ <div class="card flow"><div>⬭ Mulai</div><div>▭ Cek cuaca</div><div>◇ Hujan? → Ya / Tidak</div><div>▭ Bawa payung / tidak</div><div>⬭ Selesai</div></div>
+ <div class="card"><b>Contoh:</b> "Jika nilai ≥ 75 maka Tuntas, jika tidak maka Remedial".<br><b>Penjelasan:</b> satu syarat, dua jalur. DAN = kedua syarat benar. Simbol: ⬭ mulai/selesai, ▭ proses, ◇ keputusan.</div>`},
+{t:'Aktivitas 1: Klasifikasi',g:'a',f:()=>sorter('s2',SORT2,['AI saja','Machine Learning','Deep Learning'],'Kelompokkan contoh berikut'),gate:()=>S.acts.s2&&SORT2.every((_,i)=>S.acts.s2.res[i]?.done)},
+{t:'Latihan Terbimbing: Simulasi',g:'a',f:simPage,gate:()=>S.acts.sim?.done},
+{t:'Aplikasi: Flowchart',g:'a',f:flowPage,gate:()=>S.acts.flow?.done},
+{t:'Latihan Formatif',g:'a',f:quizF,gate:()=>S.acts.form&&F.every((_,i)=>S.acts.form.res[i]?.done)},
+{t:'Evaluasi Akhir',g:'e',f:evalPage,gate:()=>!!S.ev},
+{t:'Refleksi',g:'r',f:()=>{const r=S.refl||{};return `<div class="card"><h3>Apa yang kamu pelajari hari ini?</h3>`+['Saya memahami konsep utama.','Saya dapat menerapkan konsep.','Saya masih membutuhkan latihan.'].map(o=>`<button class="opt ${r.choice==o?'sel':''}" onclick="rc(this.textContent)">${o}</button>`).join('')+`<label>Satu hal penting yang saya pelajari adalah…</label><textarea rows="3" oninput="rt(this.value)">${esc(r.text||'')}</textarea></div>`},gate:()=>!!S.refl?.choice},
+{t:'Selesai',g:'r',f:()=>{if(!S.done){S.done=true;S.doneAt=now();log('Menyelesaikan pembelajaran')}return `<div class="card"><h2>Selesai! 🎉</h2><p>Hebat, ${esc(S.nama)}. Nilai evaluasimu: <b>${S.ev?.pct??0}%</b>.</p><p class="m">Datamu sudah tersimpan. Kamu boleh menutup halaman ini.</p><button class="btn" onclick="home()">🏠 Home</button></div>`}}];
+function home(){save();S=null;mode='s';render();scrollTo(0,0)}
+function rc(v){S.refl=S.refl||{};S.refl.choice=v;log('Refleksi');render()}
+function rt(v){S.refl=S.refl||{};S.refl.text=v;save();}
+
+function prog(){const vis=(a,b)=>{let c=0;for(let i=a;i<=b;i++)if(S.max>=i&&(i<a||true)&&S.max>i||(S.step==i&&S.max>i))c++;return c};
+ const m=Math.min(4,Math.max(0,S.max-3+(S.max>=7?0:0)));const mat=Math.round(Math.min(4,Math.max(0,S.max-2))/4*100);
+ const act=Math.round(['ap','s2','sim','flow','form'].slice(1).filter(k=>k=='sim'?S.acts.sim?.done:k=='flow'?S.acts.flow?.done:k=='form'?P[10].gate():P[7].gate()).length/4*100);
+ return [['Materi',mat],['Aktivitas',act],['Evaluasi',S.ev?100:0]]}
+function bars(){return prog().map(([n,v])=>`<div class="m">${n} ${v}%</div><div class="bar"><i style="width:${v}%"></i></div>`).join('')}
+function render(){
+ if(mode=='d')return dash();
+ if(!S)return loginView();
+ const p=P[S.step];
+ app.innerHTML=`<div class="row"><b>MPI · AI &amp; Machine Learning</b><span class="pill">Halaman ${S.step} dari ${N-1}</span></div><div class="card">${bars()}</div>
+ <h2>${p.t}</h2>${p.f()}
+ <div class="row card"><button class="btn g" onclick="go(${S.step-1})" ${S.step<=1?'disabled':''}>← Back</button><button class="btn g" onclick="openD()">Guru</button><button class="btn" onclick="go(${S.step+1})" ${(S.step>=N-1)||(p.gate&&!p.gate())?'disabled':''}>Next →</button></div><div class="m" id="st">${db?'Data tersimpan online.':'Data tersimpan di perangkat ini.'}</div>`}
+function loginView(msg){app.innerHTML=`<div class="card"><h1>🤖 Mengenal AI dan Machine Learning</h1><p class="m">Kelas 8 SMP · Fase D · Koding dan Kecerdasan Artifisial</p>
+ <label>Nama lengkap</label><input id="n"><label>Kelas</label><input id="k" placeholder="contoh: 8A"><label>Nomor absen</label><input id="a" type="number" min="1">
+ <div class="fb no">${msg||''}</div><button class="btn" onclick="login()">Masuk</button><p><button class="btn g" onclick="openD()">Dashboard Guru</button></p><div class="m" id="st"></div></div>`}
+async function login(){const nama=$('#n').value.trim(),kelas=$('#k').value.trim().toUpperCase(),absen=$('#a').value.trim();
+ if(!nama||!kelas||!absen)return loginView('Isi nama, kelas, dan nomor absen dulu ya.');
+ const id=(kelas+'-'+absen+'-'+nama).toLowerCase().replace(/[^a-z0-9]+/g,'-');let old=null;
+ let L=null;try{L=JSON.parse(localStorage.getItem(LS)||'null')}catch(e){}
+ if(S&&S.id==id)old=S;else if(L&&L.id==id)old=L;else if(db){try{const d=await db.collection('students').doc(id).get();if(d.exists)old=d.data()}catch(e){}}
+ S=old||{id,nama,kelas,absen,created:now(),step:1,max:1,acts:{},ev:null,refl:null,done:false};
+ S.nama=nama;S.login=now();S.step=Math.max(1,S.step);log('Login');mode='s';render()}
+function openD(){mode='d';loadD()}
+async function loadD(){D=[];if(!db){dash();return}try{const q=await db.collection('students').get();D=q.docs.map(d=>d.data())}catch(e){}dash()}
+function dash(){
+ if(!db){app.innerHTML=`<div class="card"><h2>TEACHER DASHBOARD</h2><p>Data online belum tersedia. Coba lagi sebentar lagi.</p><button class="btn" onclick="mode='s';render()">Kembali</button> <button class="btn g" onclick="openD()">Coba lagi</button></div>`;return}
+ const q=($('#fq')?.value||'').toLowerCase(),fk=$('#fk')?.value||'',fs=$('#fs')?.value||'';
+ const rows=D.filter(s=>(!q||s.nama.toLowerCase().includes(q))&&(!fk||s.kelas==fk)&&(!fs||(s.done?'Selesai':'Belajar')==fs));
+ const ks=[...new Set(D.map(s=>s.kelas))].sort(),sel=D.filter(s=>s.ev),avg=sel.length?Math.round(sel.reduce((a,s)=>a+s.ev.pct,0)/sel.length):0;
+ const pc=s=>s.done?100:Math.round(s.max/(N-1)*100);
+ app.innerHTML=`<div class="row"><h2>TEACHER DASHBOARD</h2><button class="btn g" onclick="mode='s';render()">Kembali</button></div>
+ <div class="card row"><span>Total siswa: <b>${D.length}</b></span><span>Sudah login: <b>${D.filter(s=>s.login).length}</b></span><span>Belajar: <b>${D.filter(s=>!s.done).length}</b></span><span>Selesai: <b>${D.filter(s=>s.done).length}</b></span><span>Rata-rata nilai: <b>${avg}</b></span></div>
+ <div class="card"><input id="fq" placeholder="Cari nama…" value="${esc(q)}" oninput="dash();$('#fq').focus()"><select id="fk" onchange="dash()"><option value="">Semua kelas</option>${ks.map(k=>`<option ${k==fk?'selected':''}>${esc(k)}</option>`).join('')}</select><select id="fs" onchange="dash()"><option value="">Semua status</option><option ${fs=='Belajar'?'selected':''}>Belajar</option><option ${fs=='Selesai'?'selected':''}>Selesai</option></select>
+ <button class="btn" onclick="loadD()">Refresh</button> <hr><input id="pin" type="password" inputmode="numeric" placeholder="PIN guru untuk unduh CSV"><button class="btn g" onclick="csv()">Export CSV</button><div class="fb no" id="pm"></div></div>
+ <div class="card tw"><table><tr><th>Nama</th><th>Kelas</th><th>Login</th><th>Progress</th><th>Nilai</th><th>Status</th><th>Aktivitas Terakhir</th></tr>${rows.map(s=>`<tr><td>${esc(s.nama)}</td><td>${esc(s.kelas)}</td><td>${fmt(s.login)}</td><td>${pc(s)}%</td><td>${s.ev?s.ev.pct:'-'}</td><td>${s.done?'Selesai':'Belajar'}</td><td>${esc(s.la||'-')}<br><span class="m">${fmt(s.lastAt)}</span></td></tr>`).join('')||'<tr><td colspan="7">Belum ada data.</td></tr>'}</table></div>`}
+async function csv(){if($('#pin')?.value!=='12345'){$('#pm').textContent='PIN salah. Unduhan hanya untuk guru.';return}$('#pm').textContent='';try{const dl=await claude.use('downloads');const h=['Nama','Kelas','Absen','Login','Progress','Nilai','Status','Aktivitas Terakhir','Refleksi'];
+ const r=D.map(s=>[s.nama,s.kelas,s.absen,s.login,s.done?100:Math.round(s.max/(N-1)*100),s.ev?s.ev.pct:'',s.done?'Selesai':'Belajar',s.la||'',(s.refl?.choice||'')+' '+(s.refl?.text||'')]);
+ await dl.save({filename:'data-siswa.csv',data:[h,...r].map(x=>x.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n')})}catch(e){}}
+render();
+(async()=>{try{if(window.claude){db=await claude.use('db');user=await claude.use('user');const st=$('#st');if(st)st.textContent=db?'Data tersimpan online.':'Data tersimpan di perangkat ini.'}}catch(e){}})();
+</script></body></html>
